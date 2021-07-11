@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+
+    <title>Image Analysis</title>
+    <style>
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 400px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        .buttons {
+            text-align: center;
+            margin-top: 5%;
+        }
+        .outputbutton {
+            text-align: center;
+            margin-top: 5%;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.min.js"></script>
+</head>
+<body>
+
+    <script language="JavaScript" type="text/javascript">
+
+    const path2images = "imagefolder/";
+    const inputfilename = "example.csv";
+    var rows = [["ImageName", "ButtonPressed"]];
+
+    function button(button) {
+        //TODO log whats been pressed into csv file
+        var currentimage = imagefiles[index];
+        var row = [currentimage, button];
+        console.log(row);
+        rows.push(row);
+
+        //TODO next image
+        index += 1;
+        var nextfile = path2images + imagefiles[index];
+        document.getElementById("image").src = nextfile;
+
+        console.log(rows);
+    }
+
+    var imagefiles = [];
+    var index = 0;
+
+    function process_csv_data(resources) {
+        var rows = []
+        const promiseArr = [];
+        for (var i = 0; i < resources.data.length; i++) {
+            var entry = resources.data[i]["imagename"]
+            imagefiles.push(entry);
+        }
+    }
+
+    function output_csv() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+
+        rows.forEach(function(rowArray) {
+            let row = rowArray.join(",");
+            csvContent += row + "\r\n";
+        });
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "my_data.csv");
+        document.body.appendChild(link); // Required for FF
+        link.click();
+    }
+
+    Papa.parse(inputfilename, {
+        header: true,
+        download: true,
+	    complete: function(results) {
+		    process_csv_data(results);
+            document.getElementById("image").src = path2images + imagefiles[index];
+	    }
+    });
+    </script>
+    
+    <div>
+        <img id="image" src="" alt="no image loaded">
+    </div>
+
+    <div id="outputbutton" class="outputbutton">
+        <button type="button" onclick="output_csv()">Output CSV</button>
+    </div>
+
+    <div id="buttons" class="buttons">
+        <button type="button" onclick="button(1)">not applicable</button>
+        <button type="button" onclick="button(2)">< 10%</button>
+        <button type="button" onclick="button(3)">30%</button>
+        <button type="button" onclick="button(4)">50%</button>
+        <button type="button" onclick="button(5)">80%</button>
+    </div>
+    
+</body>
+</html>
